@@ -3,9 +3,9 @@ Set up Elasticsearch By NEST Library version 7.10.1 with ASP.NET Core 3.1 and Do
 
 to run and test project,you must do the following steps first.
 
-<code>sudo docker create network esnetwork</code>
+you must first create network to watch Elasticsearch and Kibana on Docker by below command:
 
-you must first create network to watch Elasticsearch and Kibana on Docker by below commands:
+<code>sudo docker create network esnetwork</code>
 
 <h3>Elasticsearch:</h3>
 
@@ -16,6 +16,23 @@ you must first create network to watch Elasticsearch and Kibana on Docker by bel
 <code>docker run --rm -p 5601:5601 --name kibana --network esnetwork kibana:7.9.3</code>
 
 after run containers,now We can run and test project.
+
+<h2>before runing and testing the project, it is better to talk about Key Concepts of the Elasticsearch</h2>
+
+<h2>Key Concepts</h2>
+<p>The key concepts of Elasticsearch are as follows:</p>
+<h3>Node</h3>
+<p>It refers to a single running instance of Elasticsearch. Single physical and virtual server accommodates multiple nodes depending upon the capabilities of their physical resources like RAM, storage and processing power.</p>
+<h3>Cluster</h3>
+<p>It is a collection of one or more nodes. Cluster provides collective indexing and search capabilities across all the nodes for entire data.</p>
+<h3>Index</h3>
+<p>It is a collection of different type of documents and their properties. Index also uses the concept of shards to improve the performance. For example, a set of document contains data of a social networking application.</p>
+<h3>Document</h3>
+<p>It is a collection of fields in a specific manner defined in JSON format. Every document belongs to a type and resides inside an index. Every document is associated with a unique identifier called the UID.</p>
+<h3>Shard</h3>
+<p>Indexes are horizontally subdivided into shards. This means each shard contains all the properties of document but contains less number of JSON objects than index. The horizontal separation makes shard an independent node, which can be store in any node. Primary shard is the original horizontal part of an index and then these primary shards are replicated into replica shards.</p>
+<h3>Replicas</h3>
+<p>Elasticsearch allows a user to create replicas of their indexes and shards. Replication not only helps in increasing the availability of data in case of failure, but also improves the performance of searching by carrying out a parallel search operation in these replicas.</p>
 
 <h2>Comparison between Elasticsearch and RDBMS</h2>
 
@@ -56,7 +73,7 @@ HttpGet --> http://localhost:5000/post/createIndex
 
 <b>to run reIndex api, call below url:</b>
 
-reIndex means :remove current index then create new index and bind data to index.
+reIndex means :remove current index then create new index and bind data to new index.
 
 HttpGet --> http://localhost:5000/post/reIndex
 
