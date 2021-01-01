@@ -16,9 +16,13 @@ namespace ElasticSearch_Example.Repository
 
         private static List<Post> _cache = new List<Post>();
 
-        public PostRepository(IConfiguration configuration) : base(configuration)
+        static PostRepository()
         {
             LoadPosts();
+        }
+
+        public PostRepository(IConfiguration configuration) : base(configuration)
+        {
         }
 
         public async Task<IEnumerable<Post>> GetPostAllPaginationAsync(int count, int skip = 0)
@@ -33,10 +37,7 @@ namespace ElasticSearch_Example.Repository
 
         public async Task<IEnumerable<Post>> GetPostAllAsync()
         {
-            var posts = _cache
-                .Where(p => p.PublishDate <= DateTime.UtcNow && p.IsPublished);
-
-            return posts;
+            return _cache.Where(p => p.PublishDate <= DateTime.UtcNow && p.IsPublished);
         }
 
         public async Task<Post> GetPostByIdAsync(Guid postId)
@@ -44,59 +45,78 @@ namespace ElasticSearch_Example.Repository
             return _cache.Single(p => p.Id == postId);
         }
 
-        public async Task AddPostAsync(Post post)
+        public async Task<bool> AddPostAsync(Post post)
         {
-            await base.AddDocumentAsync(post);
+            var response = await base.AddDocumentAsync(post);
 
-            AddDataToInMemory(post);
+            if (response.IsValid)
+            {
+                AddDataToInMemory(post);
+            }
+
+            return response.IsValid;
         }
 
-        public async Task EditPostAsync(Post post)
+        public async Task<bool> EditPostAsync(Post post)
         {
-            await base.EditDocumentAsync(post);
+            var response = await base.EditDocumentAsync(post);
 
-            EditDataFromInMemory(post);
+            if (response.IsValid)
+            {
+                EditDataFromInMemory(post);
+            }
+
+            return response.IsValid;
         }
 
-        public async Task DeletePostAsync(Guid postId)
+        public async Task<bool> DeletePostAsync(Guid postId)
         {
-            await base.DeleteDocumentAsync(postId);
+            var response = await base.DeleteDocumentAsync(postId);
 
-            RemoveDataFromInMemory(postId);
+            if (response.IsValid)
+            {
+                RemoveDataFromInMemory(postId);
+            }
+
+            return response.IsValid;
         }
 
         public async Task<List<Post>> SearchPostByQueryAsync(string query, int page, int pageSize)
         {
-            return await base.SearchByQueryAsync(query, page, pageSize);
+            return await base.SearchDocumentByQueryAsync(query, page, pageSize);
         }
-
-        public override async Task ReIndexAsync(IEnumerable<Post> posts)
+        
+        public override async Task ReIndexAsync(IEnumerable<Post> entities)
         {
-            await base.ReIndexAsync(posts);
+            _cache = new List<Post>();
+
+            await base.ReIndexAsync(entities);
+            
+            AddRangeDataToInMemory(entities);
         }
 
         #region InMemoryData
 
-        private void AddRangeDataToInMemory(IEnumerable<Post> posts)
+        private static void AddRangeDataToInMemory(IEnumerable<Post> posts)
         {
             _cache.AddRange(posts);
 
             SortCache();
         }
 
-        private void AddDataToInMemory(Post post)
+        private static void AddDataToInMemory(Post post)
         {
             _cache.Add(post);
 
             SortCache();
         }
 
-        private List<Post> GetDataFromInMemory()
+        private static List<Post> GetDataFromInMemory()
         {
             return _cache;
         }
 
-        private void RemoveDataFromInMemory(Guid postId)
+        private static void RemoveDataFromInMemory(Guid postId)
         {
             if (_cache.Any(p => p.Id == postId))
             {
@@ -106,7 +126,7 @@ namespace ElasticSearch_Example.Repository
             }
         }
 
-        private void EditDataFromInMemory(Post post)
+        private static void EditDataFromInMemory(Post post)
         {
             RemoveDataFromInMemory(post.Id);
             AddDataToInMemory(post);
@@ -114,12 +134,12 @@ namespace ElasticSearch_Example.Repository
             SortCache();
         }
 
-        private void SortCache()
+        private static void SortCache()
         {
             GetDataFromInMemory().Sort((p1, p2) => p2.PublishDate.CompareTo(p1.PublishDate));
         }
 
-        private void LoadPosts()
+        private static void LoadPosts()
         {
             var posts = new List<Post>
             {

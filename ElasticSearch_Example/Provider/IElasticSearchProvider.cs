@@ -6,15 +6,15 @@ namespace ElasticSearch_Example.Provider
 {
     public interface IElasticSearchProvider<TEntity, in TId>
     {
-        Task AddDocumentAsync(TEntity entity);
+        Task<IndexResponse> AddDocumentAsync(TEntity entity);
 
-        Task EditDocumentAsync(TEntity entity);
+        Task<IndexResponse> EditDocumentAsync(TEntity entity);
 
         Task<DeleteResponse> DeleteDocumentAsync(TId id);
 
         Task DeleteIndexAsync(string aliasName);
 
-        Task<List<TEntity>> SearchByQueryAsync(string query, int page, int pageSize);
+        Task<List<TEntity>> SearchDocumentByQueryAsync(string query, int page, int pageSize);
 
         Task ReIndexAsync(IEnumerable<TEntity> entities);
 
@@ -24,7 +24,7 @@ namespace ElasticSearch_Example.Provider
 
         Task IndexBulkAsync(IEnumerable<TEntity> entities);
 
-        Task AddManyDocumentAsync(IEnumerable<TEntity> entities);
+        Task<BulkResponse> AddManyDocumentAsync(IEnumerable<TEntity> entities);
 
         Task<bool> IsExistIndexAsync();
 

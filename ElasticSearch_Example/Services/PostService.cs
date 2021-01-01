@@ -41,7 +41,7 @@ namespace ElasticSearch_Example.Services
                     .Select(
                         c => new Comment
                         {
-                            Id = new Random(DateTime.Now.Millisecond).Next(0, 10000),
+                            Id = new Random(DateTime.Now.Millisecond).Next(0, 99999),
                             Author = c.Author,
                             Content = c.Content,
                             Email = c.Email,
@@ -49,13 +49,18 @@ namespace ElasticSearch_Example.Services
                         })
             };
 
-            await _postRepository.AddPostAsync(post);
+            var result = await _postRepository.AddPostAsync(post);
+
+            if (!result)
+            {
+                throw new InvalidOperationException();
+            }
         }
 
         public async Task EditPostAsync(Guid postId, EditPostRequest request)
         {
             var post = await _postRepository.GetPostByIdAsync(postId);
-            
+
             if (post != null)
             {
                 post.Id = postId;
@@ -79,7 +84,12 @@ namespace ElasticSearch_Example.Services
                             PublishDate = DateTime.Now
                         });
 
-                await _postRepository.EditPostAsync(post);
+                var result = await _postRepository.EditPostAsync(post);
+
+                if (!result)
+                {
+                    throw new InvalidOperationException();
+                }
             }
             else
             {
@@ -89,7 +99,12 @@ namespace ElasticSearch_Example.Services
 
         public async Task DeletePostAsync(DeletePostRequest request)
         {
-            await _postRepository.DeletePostAsync(request.Id);
+            var result = await _postRepository.DeletePostAsync(request.Id);
+
+            if (!result)
+            {
+                throw new InvalidOperationException();
+            }
         }
 
         public async Task<List<Post>> SearchPostByQueryAsync(PostSearchRequest request)

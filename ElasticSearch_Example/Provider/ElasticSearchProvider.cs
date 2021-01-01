@@ -54,12 +54,12 @@ namespace ElasticSearch_Example.Provider
             return new ElasticClient(connectionSettings);
         }
 
-        public virtual async Task AddDocumentAsync(TEntity entity)
+        public virtual async Task<IndexResponse> AddDocumentAsync(TEntity entity)
         {
-            await ElasticClient.IndexAsync(entity, idx => idx.Index(IndexName));
+          return await ElasticClient.IndexAsync(entity, idx => idx.Index(IndexName));
         }
 
-        public virtual async Task EditDocumentAsync(TEntity entity)
+        public virtual async Task<IndexResponse> EditDocumentAsync(TEntity entity)
         {
             var isExistResult = await IsExistDocumentAsync(entity.Id);
 
@@ -68,12 +68,7 @@ namespace ElasticSearch_Example.Provider
                 throw new InvalidOperationException("not found");
             }
 
-            var response = await ElasticClient.IndexAsync(entity, idx => idx.Index(IndexName));
-            
-            if (!response.IsValid)
-            {
-                throw new InvalidOperationException();
-            }
+            return await ElasticClient.IndexAsync(entity, idx => idx.Index(IndexName));
         }
 
         public virtual async Task<DeleteResponse> DeleteDocumentAsync(TId id)
@@ -83,7 +78,7 @@ namespace ElasticSearch_Example.Provider
             // await ElasticClient.DeleteByQueryAsync<TEntity>(q => q.MatchAll());
         }
 
-        public virtual async Task<List<TEntity>> SearchByQueryAsync(string query, int page, int pageSize)
+        public virtual async Task<List<TEntity>> SearchDocumentByQueryAsync(string query, int page, int pageSize)
         {
             var response = await ElasticClient.SearchAsync<TEntity>(
                 s =>
@@ -139,17 +134,9 @@ namespace ElasticSearch_Example.Provider
                         .IndexMany(entities));
         }
 
-        public virtual async Task AddManyDocumentAsync(IEnumerable<TEntity> entities)
+        public virtual async Task<BulkResponse> AddManyDocumentAsync(IEnumerable<TEntity> entities)
         {
-            var indexManyResponse = await ElasticClient.IndexManyAsync(entities, IndexName);
-
-            if (indexManyResponse.Errors)
-            {
-                foreach (var itemWithError in indexManyResponse.ItemsWithErrors)
-                {
-                    Console.WriteLine($"Failed to index document {itemWithError.Id}: {itemWithError.Error}");
-                }
-            }
+            return await ElasticClient.IndexManyAsync(entities, IndexName);
         }
 
         public virtual async Task CreateIndexAsync()
