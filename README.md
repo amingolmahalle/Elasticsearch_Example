@@ -3,7 +3,7 @@ Set up Elasticsearch By NEST Library version 7.10.1 with ASP.NET Core 3.1 and Do
 
 to run and test project,you must do the following steps first.
 
-you must first create network to watch Elasticsearch and Kibana on Docker by below command:
+firstyou have to create network to watch Elasticsearch and Kibana on Docker by below command:
 
 <code>sudo docker create network esnetwork</code>
 
@@ -123,7 +123,7 @@ body:
 
 <b>to run editDocument api, call below url:</b>
 
-HttpPost --> http://localhost:5000/post/editDocument/0f8fad5b-d9cb-469f-a165-70867728950e
+HttpPut --> http://localhost:5000/post/editDocument/0f8fad5b-d9cb-469f-a165-70867728950e
 
 body:
 <pre>
